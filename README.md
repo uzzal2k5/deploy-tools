@@ -11,9 +11,9 @@ Into the `inventory` directory , file name `inventory` is used for server list w
 - Example `inventory`
         
     
-    #IP_ADDRESS:USER_NAME:PASSWORD_HASH(base64)
-    192.168.122.187:root:b3ZpcnQK
-    #127.0.0.1:uzzal:c2hhZmlxMms1Cg==
+        #IP_ADDRESS:USER_NAME:PASSWORD_HASH(base64)
+        192.168.122.187:root:b3ZpcnQK
+        #127.0.0.1:uzzal:c2hhZmlxMms1Cg==
 
 *Note:* New Line need to add at the end of inventory 
 
