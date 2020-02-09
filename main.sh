@@ -1,44 +1,49 @@
 #!/usr/bin/env bash
 set -ex
+# VARIABLE DECLARATION
 DEFAULT=22
 PORT=$DEFAULT
-SCRIPTS=$1
 COUNTER=1
 DEPLOY="./deploy"
-REMOTE_DIR=/tmp/
-SETUP="/tmp/deploy/setup.sh"
+REMOTE_DIR_DEFAULT=/tmp
+REMOTE_DIR=$REMOTE_DIR_DEFAULT
+SETUP="$REMOTE_DIR/deploy/setup.sh"
+SCRIPTS_DEFAULT="$REMOTE_DIR/deploy/scripts"
+SCRIPTS=$SCRIPTS_DEFAULT
 #
-#https://devdojo.com/tutorials/executing-bash-script-on-multiple-remote-server
-#Find inventory exists or Not
-
+#
+# FIND INVENTORY, IF EXIST OR NOT
 INVENTORY=`find ./inventory -type f -name "inventory"`
 if [[ ! -f "$INVENTORY" ]];
  then
-   echo "Inventory List  does not exist"
+   # IF NOT FOUND, GIVE A ERROR MESSAGE
+   echo "Inventory List does not exist"
    exit 1
 fi
 
 if [ ! -s "$INVENTORY" ]
 then
+  # IF EMPTY, GIVE A ERROR MESSAGE
 	echo "$INVENTORY is empty. No inventory Records found!"
-        # do something as file is empty
+	exit 1
 fi
 
-#Read From Inventroy - Server List
-while read  -r LINE; do
-# reading each line
+# READ FROM INVENTORY - SERVER LIST
+while IFS=  read  -rs LINE; do
+# READING EACH LINE
 [[ "$LINE" =~ ^[[:space:]]*# ]] && continue
 echo $LINE
 SERVER=`echo "$LINE" | cut -f1 -d":"`
 USERNAME=`echo "$LINE" | cut -f2 -d":"`
 PASSWORD=`echo "$LINE" | cut -f3 -d":"`
-#================SCP============================================================================================#
-sshpass -p "$PASSWORD" -v scp -o "StrictHostKeyChecking no"  -r "$DEPLOY"  "$USERNAME"@"$SERVER":$REMOTE_DIR  </dev/null
 
-#=============DIRECT SCRIPTS RUN ON REMOTE SERVER===============================================================#
+#=COPY DEPLOYMENT SCRIPTS TO REMOTE SERVER=#
+sshpass -p $(echo "$PASSWORD" | openssl enc -base64 -d) -v scp -P $PORT -o "StrictHostKeyChecking no"  -r "$DEPLOY"  "$USERNAME"@"$SERVER":$REMOTE_DIR  </dev/null
 
-sshpass -p "$PASSWORD" -v ssh -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
-#=============DIRECT SCRIPTS RUN END============================================================================#
+#=SCRIPTS RUN ON REMOTE SERVER=#
+
+sshpass -p $(echo "$PASSWORD" | openssl enc -base64 -d) -v ssh  -p $PORT -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
+#= SCRIPTS RUN END=#
 
 COUNTER=$[$COUNTER +1]
 done < $INVENTORY

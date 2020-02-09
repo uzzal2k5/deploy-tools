@@ -1,3 +1,4 @@
-192.168.122.187:root:ovirt
-#127.0.0.1:uzzal:shafiq
-192.168.122.166:root:ansible
+#IP_ADDRESS:USER_NAME:PASSWORD_HASH(base64)
+192.168.122.187:root:b3ZpcnQK
+#127.0.0.1:uzzal:c2hhZmlxMms1Cg==
+192.168.122.166:root:YW5zaWJsZQo=
