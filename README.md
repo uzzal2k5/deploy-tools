@@ -2,18 +2,18 @@ deploy-tools
 ---
 - Requirements 
     - sshpass
-    - openssl
+
 
 Prepare Inventory
 ---   
-Into the `inventory` directory , file name `inventory` is used for server list where `# ` can be use for comments. 
+Into the `inventory` directory , file name `inventory` is used for server list where no space can be in between two lines.
 
 - Example `inventory`
         
     
-        #IP_ADDRESS:USER_NAME:PASSWORD_HASH(base64)
-        192.168.122.187:root:b3ZpcnQK
-        #127.0.0.1:uzzal:c2hhZmlxMms1Cg==
+      
+       192.168.122.187:root:password
+       127.0.0.1:uzzal:mypass
 
 *Note:* New Line need to add at the end of inventory 
 
@@ -28,18 +28,17 @@ Under `deploy/scripts` edit `main.sh` for the scripts you want to work with. You
         hostname
         df -h
         ls -la
-        blkid
         lsblk
 
 
 
 How to Run 
  ---
-    chmod +x  deployment-tools/main.sh   
+    git clone https://github.com/uzzal2k5/deploy-tools.git
     cd deployment-tools
-    main.sh 
+    sh main.sh 
     
     
  Tested
  ---
- Tested only CentOs 7
+ Tested on  CentOs 7, Debian 9.12 (stretch), Debian 10.3 (buster) & Ubuntu Server 18.04.4 LTS
