@@ -30,6 +30,10 @@ fi
 # READ FROM INVENTORY - SERVER LIST
 while IFS=  read  -r LINE; do
 # READING EACH LINE
+if [ -z "${LINE}" ]; then
+    echo "All is Done or Line is empty"
+    exit 1
+fi
 echo $LINE
 SERVER=`echo "$LINE" | cut -f1 -d":"`
 USERNAME=`echo "$LINE" | cut -f2 -d":"`
@@ -42,5 +46,4 @@ sshpass -p "$PASSWORD" -v scp -P $PORT -o "StrictHostKeyChecking no"  -r "$DEPLO
 
 sshpass -p "$PASSWORD" -v ssh  -p $PORT -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
 #= SCRIPTS RUN END=#
-
 done < $INVENTORY
