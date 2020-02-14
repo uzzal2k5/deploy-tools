@@ -1,36 +1,46 @@
 #!/usr/bin/env bash
 set -ex
-SCRIPTS=$1
-COUNTER=1
- #
-#Find inventory exists or Not
-
+# VARIABLE DECLARATION
+DEFAULT=22
+PORT=$DEFAULT
+DEPLOY="./deploy"
+REMOTE_DIR_DEFAULT=/tmp
+REMOTE_DIR=$REMOTE_DIR_DEFAULT
+SETUP="$REMOTE_DIR/deploy/setup.sh"
+SCRIPTS_DEFAULT="$REMOTE_DIR/deploy/scripts"
+SCRIPTS=$SCRIPTS_DEFAULT
+#
+#
+# FIND INVENTORY, IF EXIST OR NOT
 INVENTORY=`find ./inventory -type f -name "inventory"`
 if [[ ! -f "$INVENTORY" ]];
  then
-   echo "Inventory List  does not exist"
+   # IF NOT FOUND, GIVE A ERROR MESSAGE
+   echo "Inventory List does not exist"
    exit 1
 fi
 
 if [ ! -s "$INVENTORY" ]
 then
+  # IF EMPTY, GIVE A ERROR MESSAGE
 	echo "$INVENTORY is empty. No inventory Records found!"
-        # do something as file is empty
+	exit 1
 fi
 
-#Read From Inventroy - Server List
-while read  -r LINE; do
-# reading each line
-[[ "$LINE" =~ ^[[:space:]]*# ]] && continue
+# READ FROM INVENTORY - SERVER LIST
+while IFS=  read  -r LINE; do
+# READING EACH LINE
 echo $LINE
 SERVER=`echo "$LINE" | cut -f1 -d":"`
 USERNAME=`echo "$LINE" | cut -f2 -d":"`
 PASSWORD=`echo "$LINE" | cut -f3 -d":"`
 
-#cat ${SCRIPTS} | sshpass -p "$PASSWORD" -v ssh -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER" </dev/null
-#sshpass -p "$PASSWORD" -v ssh -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER" 'ls -la' </dev/null
-cat ${SCRIPTS} | sshpass -p "$PASSWORD" -v ssh -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"
-COUNTER=$[$COUNTER +1]
-done < $INVENTORY
-echo $COUNTER
+#=COPY DEPLOYMENT SCRIPTS TO REMOTE SERVER=#
+sshpass -p "$PASSWORD" -v scp -P $PORT -o "StrictHostKeyChecking no"  -r "$DEPLOY"  "$USERNAME"@"$SERVER":$REMOTE_DIR  </dev/null
 
+#=SCRIPTS RUN ON REMOTE SERVER=#
+
+sshpass -p "$PASSWORD" -v ssh  -p $PORT -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
+#= SCRIPTS RUN END=#
+
+done < $INVENTORY
