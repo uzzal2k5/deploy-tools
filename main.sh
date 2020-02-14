@@ -3,7 +3,6 @@ set -ex
 # VARIABLE DECLARATION
 DEFAULT=22
 PORT=$DEFAULT
-COUNTER=1
 DEPLOY="./deploy"
 REMOTE_DIR_DEFAULT=/tmp
 REMOTE_DIR=$REMOTE_DIR_DEFAULT
@@ -29,22 +28,19 @@ then
 fi
 
 # READ FROM INVENTORY - SERVER LIST
-while IFS=  read  -rs LINE; do
+while IFS=  read  -r LINE; do
 # READING EACH LINE
-[[ "$LINE" =~ ^[[:space:]]*# ]] && continue
 echo $LINE
 SERVER=`echo "$LINE" | cut -f1 -d":"`
 USERNAME=`echo "$LINE" | cut -f2 -d":"`
 PASSWORD=`echo "$LINE" | cut -f3 -d":"`
 
 #=COPY DEPLOYMENT SCRIPTS TO REMOTE SERVER=#
-sshpass -p $(echo "$PASSWORD" | openssl enc -base64 -d) -v scp -P $PORT -o "StrictHostKeyChecking no"  -r "$DEPLOY"  "$USERNAME"@"$SERVER":$REMOTE_DIR  </dev/null
+sshpass -p "$PASSWORD" -v scp -P $PORT -o "StrictHostKeyChecking no"  -r "$DEPLOY"  "$USERNAME"@"$SERVER":$REMOTE_DIR  </dev/null
 
 #=SCRIPTS RUN ON REMOTE SERVER=#
 
-sshpass -p $(echo "$PASSWORD" | openssl enc -base64 -d) -v ssh  -p $PORT -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
+sshpass -p "$PASSWORD" -v ssh  -p $PORT -o "StrictHostKeyChecking no"  "$USERNAME"@"$SERVER"  "sh $SETUP"  </dev/null
 #= SCRIPTS RUN END=#
 
-COUNTER=$[$COUNTER +1]
 done < $INVENTORY
-echo $[$COUNTER -1]

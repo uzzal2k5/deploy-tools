@@ -4,5 +4,5 @@ ip a
 hostname
 df -h
 ls -la
-blkid
 lsblk
+hostname
